@@ -1,0 +1,16 @@
+# --- Secrets ---
+.env
+
+# --- Python build and cache files ---
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# --- Local data and Spark state ---
+data/
+checkpoints/
+
+# --- macOS system files ---
+.DS_Store
