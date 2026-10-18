@@ -1,0 +1,90 @@
+# Local development stack for the MarketPulse pipeline.
+#   Start: docker compose up -d
+#   Stop:  docker compose down        (add -v to also delete database data)
+# Values like ${POSTGRES_USER} are filled in from the .env file automatically.
+
+services:
+  kafka:
+    image: apache/kafka:3.9.0      # Official image; native ARM64 support for M-series Macs
+    container_name: kafka
+    ports:
+      - "9092:9092"                # Lets tools on the local computer (outside Docker) reach Kafka
+    environment:
+      # KRaft mode: Kafka manages its own metadata, so no ZooKeeper is needed.
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller   # One node does both jobs (fine for dev, not prod)
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # Two "doors" for clients, because "localhost" means different things in
+      # different places. Containers connect via kafka:19092; your local system via localhost:9092.
+      KAFKA_LISTENERS: INTERNAL://:19092,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      # Only one broker exists, so Kafka's internal topics can only keep one copy.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # Topics are created explicitly by kafka-init, so a typo in a topic
+      # name causes an error instead of silently creating a new topic.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      # Other services wait until this succeeds, i.e. Kafka is actually ready.
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:19092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+
+  kafka-init:
+    # A one-off helper: creates the topic, then exits.
+    image: apache/kafka:3.9.0
+    container_name: kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092
+        --create --if-not-exists --topic stock_prices_raw
+        --partitions 3 --replication-factor 1
+    restart: "no"
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest   # Maintained successor of provectus/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"                    # Open http://localhost:8080 in your browser
+    environment:
+      KAFKA_CLUSTERS_0_NAME: marketpulse-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    ports:
+      # Mac side is configurable, defaulting to 5433 to avoid clashing with a
+      # local PostgreSQL install. The container side stays at Postgres's standard 5432.
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      # A named volume keeps data when containers are removed and recreated.
+      - postgres_data:/var/lib/postgresql/data
+      # Scripts in this folder run automatically the first time the database is created.
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      # $$ passes a literal $ so the variable is read inside the container.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

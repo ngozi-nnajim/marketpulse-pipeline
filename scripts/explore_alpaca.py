@@ -9,10 +9,13 @@ the real producer. Run this from the project root with:
 import os
 from datetime import UTC, datetime, timedelta
 
+import pandas as pd
 from alpaca.data.enums import DataFeed
 from alpaca.data.historical import CryptoHistoricalDataClient, StockHistoricalDataClient
 from alpaca.data.requests import CryptoBarsRequest, StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
+
+pd.set_option("display.max_columns", None)  # show all columns
 
 
 def fetch_crypto_bars() -> None:
