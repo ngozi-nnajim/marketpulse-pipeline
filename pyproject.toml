@@ -3,7 +3,9 @@ name = "marketpulse-pipeline"
 version = "0.1.0"
 description = "Real-time stock market data pipeline using Kafka, Spark, PostgreSQL and Metabase"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "alpaca-py>=0.44.0",
+]
 
 [dependency-groups]
 dev = [
