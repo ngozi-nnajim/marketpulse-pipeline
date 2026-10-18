@@ -11,3 +11,23 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.17.1",
 ]
+
+[tool.ruff]
+line-length = 88          # Common default; keeps code readable side by side
+target-version = "py312"  # Lets Ruff suggest modern Python 3.12 syntax
+
+[tool.ruff.lint]
+# Each letter code switches on a family of rules:
+select = [
+    "E", "F",  # pycodestyle errors and Pyflakes: real bugs like undefined names
+    "I",       # isort: keeps imports sorted consistently
+    "B",       # flake8-bugbear: common bug patterns
+    "UP",      # pyupgrade: modern Python syntax
+    "D",       # pydocstyle: enforces docstrings on functions and modules
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"     # Google-style docstrings: widely used and easy to read
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]         # Test names already describe them; docstrings there are optional

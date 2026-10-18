@@ -22,5 +22,5 @@ Use Alpaca (option 2), approved by the project assigner.
 - **Positive:** genuinely real-time data; no replay workaround or local cache needed.
 - **Negative:** the free plan covers only the IEX exchange, so volumes are a
   partial view of the market.
-- **Negative:** the stock stream is quiet outside US market hours. Alpaca's 24/7 crypto 
+- **Negative:** the stock stream is quiet outside US market hours. Alpaca's 24/7 crypto
   stream will be used for testing evenings and weekends.

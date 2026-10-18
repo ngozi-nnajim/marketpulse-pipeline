@@ -1,0 +1,30 @@
+# Pre-commit hooks run automatically before every `git commit`.
+# If any hook fails, the commit is blocked so problems never reach the repo.
+# Run all hooks manually with: uv run pre-commit run --all-files
+
+repos:
+  # General file hygiene checks, maintained by the pre-commit team.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace      # Removes invisible spaces at line ends
+      - id: end-of-file-fixer        # Ensures files end with a newline (POSIX convention)
+      - id: check-yaml               # Catches YAML syntax errors (docker-compose, CI files)
+      - id: check-toml               # Catches TOML syntax errors (pyproject.toml)
+      - id: check-added-large-files  # Blocks accidentally committing big data files
+      - id: detect-private-key       # Blocks committing private keys
+
+  # Ruff: linting (finds bugs) and formatting (consistent style).
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
+    hooks:
+      - id: ruff-check
+        args: [--fix]                # Auto-fix simple issues like unused imports
+      - id: ruff-format
+
+  # Gitleaks: scans for secrets such as API keys and passwords.
+  # Critical here, because this project handles Alpaca credentials.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
