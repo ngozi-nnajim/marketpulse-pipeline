@@ -1,0 +1,13 @@
+[project]
+name = "marketpulse-pipeline"
+version = "0.1.0"
+description = "Real-time stock market data pipeline using Kafka, Spark, PostgreSQL and Metabase"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.7.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
