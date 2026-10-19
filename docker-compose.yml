@@ -118,12 +118,35 @@ services:
       - postgres_data:/var/lib/postgresql/data
       # Scripts in this folder run automatically the first time the database is created.
       - ./sql/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./sql/02_metabase.sql:/docker-entrypoint-initdb.d/02_metabase.sql:ro
     healthcheck:
       # $$ passes a literal $ so the variable is read inside the container.
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: marketpulse-metabase
+    ports:
+      # Mac side is configurable (default 3001) to avoid clashing with other
+      # apps on port 3000. Metabase itself always listens on 3000 inside.
+      - "${METABASE_HOST_PORT:-3001}:3000"
+    environment:
+      # Store Metabase's own data (dashboards, users) in PostgreSQL, not a
+      # file inside the container, so it survives container restarts.
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: postgres
+      MB_DB_PORT: "5432"
+      MB_DB_DBNAME: metabase_app
+      MB_DB_USER: ${POSTGRES_USER}
+      MB_DB_PASS: ${POSTGRES_PASSWORD}
+      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
