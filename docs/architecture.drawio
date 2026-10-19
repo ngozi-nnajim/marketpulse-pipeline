@@ -59,7 +59,7 @@
         <mxCell id="wtoi6_QzmGq3HEnfh9a4-33" edge="1" parent="wtoi6_QzmGq3HEnfh9a4-35" source="wtoi6_QzmGq3HEnfh9a4-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=light-dark(#000000,#000000);strokeWidth=1;" target="wtoi6_QzmGq3HEnfh9a4-16">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wtoi6_QzmGq3HEnfh9a4-45" connectable="0" parent="wtoi6_QzmGq3HEnfh9a4-33" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;JDBC Write&lt;/font&gt;" vertex="1">
+        <mxCell id="wtoi6_QzmGq3HEnfh9a4-45" connectable="0" parent="wtoi6_QzmGq3HEnfh9a4-33" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 9px;&quot;&gt;Upsert (foreachBatch)&lt;/font&gt;" vertex="1">
           <mxGeometry relative="1" x="0.417" y="-1" as="geometry">
             <mxPoint y="-3" as="offset" />
           </mxGeometry>
