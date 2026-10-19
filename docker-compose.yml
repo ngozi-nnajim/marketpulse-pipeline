@@ -77,6 +77,31 @@ services:
         condition: service_completed_successfully   # Topic must exist first
     restart: unless-stopped            # Auto-restart after a crash
 
+  spark-job:
+    build:
+      context: .
+      dockerfile: docker/spark.Dockerfile
+    container_name: spark-job
+    ports:
+      - "4040:4040"                    # Spark UI: http://localhost:4040
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+      KAFKA_TOPIC: stock_prices_raw
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"            # Container-to-container port, not the Mac port
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      CHECKPOINT_DIR: /opt/checkpoints
+    volumes:
+      - spark_checkpoints:/opt/checkpoints   # Progress survives restarts
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   postgres:
     image: postgres:16
     container_name: postgres
@@ -102,3 +127,4 @@ services:
 
 volumes:
   postgres_data:
+  spark_checkpoints:

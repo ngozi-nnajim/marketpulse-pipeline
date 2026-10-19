@@ -40,7 +40,9 @@ def build_message(
         "low": bar.low,
         "close": bar.close,
         "volume": bar.volume,
-        "trade_count": bar.trade_count,
+        # The SDK returns trade_count as a float (e.g. 184.0), but the message
+        # contract defines it as an integer: you can't have half a trade.
+        "trade_count": int(bar.trade_count) if bar.trade_count is not None else None,
         "vwap": bar.vwap,
         "ingested_at": ingested_at.isoformat(),
     }
