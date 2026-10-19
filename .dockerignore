@@ -1,0 +1,10 @@
+# Never pass secrets into an image; they're passed in at runtime instead.
+.env
+.venv/
+.git/
+data/
+checkpoints/
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+docs/

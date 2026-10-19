@@ -63,6 +63,20 @@ services:
       kafka:
         condition: service_healthy
 
+  producer:
+    build:
+      context: .
+      dockerfile: docker/producer.Dockerfile
+    container_name: producer
+    env_file: .env                     # Alpaca keys are injected at runtime
+    environment:
+      # Inside Docker, Kafka is reached by service name, not localhost.
+      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully   # Topic must exist first
+    restart: unless-stopped            # Auto-restart after a crash
+
   postgres:
     image: postgres:16
     container_name: postgres
