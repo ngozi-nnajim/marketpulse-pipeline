@@ -12,6 +12,7 @@ repos:
       - id: check-yaml               # Catches YAML syntax errors (docker-compose, CI files)
       - id: check-toml               # Catches TOML syntax errors (pyproject.toml)
       - id: check-added-large-files  # Blocks accidentally committing big data files
+        args: [--maxkb=5000]
       - id: detect-private-key       # Blocks committing private keys
 
   # Ruff: linting (finds bugs) and formatting (consistent style).
