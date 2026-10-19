@@ -18,6 +18,13 @@ build-backend = "hatchling.build"
 # "marketpulse".
 packages = ["src/marketpulse"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Find the marketpulse package directly in src/, even without an editable
+# install.
+pythonpath = ["src"]
+filterwarnings = ["ignore::DeprecationWarning:websockets.*"]
+
 [dependency-groups]
 dev = [
     "pre-commit>=4.7.0",

@@ -1,0 +1,53 @@
+# Continuous integration: runs on every push to main and on every pull request.
+# Three jobs run in parallel; all must pass for the commit to get a green tick.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true          # Reuse downloaded packages between runs
+
+      - name: Install dependencies (exactly as locked)
+        run: uv sync --locked
+
+      # Same hooks as locally (ruff, gitleaks, file checks), in case someone
+      # committed without them.
+      - name: Run pre-commit hooks
+        run: uv run pre-commit run --all-files --show-diff-on-failure
+
+      - name: Run unit tests
+        run: uv run pytest -v
+
+  spark-tests:
+    name: Spark tests (inside the Spark image)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the Spark test image
+        run: docker build --target test -f docker/spark.Dockerfile -t marketpulse-spark-test .
+
+      - name: Run Spark tests
+        run: docker run --rm marketpulse-spark-test
+
+  producer-image:
+    name: Build producer image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Proves the producer image still builds; catches broken Dockerfiles early.
+      - name: Build the producer image
+        run: docker build -f docker/producer.Dockerfile -t marketpulse-producer .
