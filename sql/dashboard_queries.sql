@@ -47,8 +47,7 @@ ORDER BY total_volume DESC;
 SELECT
     window_start,
     symbol,
-    ROUND(100 * (max_high - min_low) / avg_close, 3) AS price_range_pct,
-    avg_close
+    ROUND(100 * (max_high - min_low) / avg_close, 3) AS price_range_pct
 FROM stock_metrics
 WHERE window_start >= now() - INTERVAL '3 hours'
 ORDER BY window_start;
